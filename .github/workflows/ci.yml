@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest -q
+
+      - name: House rule, no em dashes
+        shell: bash
+        run: |
+          # The pattern is written as a bash escape so this workflow file stays
+          # ASCII and does not match itself.
+          if grep -rn --binary-files=without-match $'\u2014' src tests README.md pyproject.toml .github; then
+            echo "em dash found, see the matches above (house rule: use commas, colons, or parentheses)"
+            exit 1
+          fi
+          echo "no em dashes found"
