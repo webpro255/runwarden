@@ -35,7 +35,7 @@ jobs:
         run: |
           # The pattern is written as a bash escape so this workflow file stays
           # ASCII and does not match itself.
-          if grep -rn --binary-files=without-match $'\u2014' src tests examples fixtures README.md pyproject.toml .github; then
+          if grep -rn --binary-files=without-match $'\u2014' src tests examples fixtures docs .github README.md LIMITATIONS.md CHANGELOG.md SECURITY.md CITATION.cff pyproject.toml; then
             echo "em dash found, see the matches above (house rule: use commas, colons, or parentheses)"
             exit 1
           fi

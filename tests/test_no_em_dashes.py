@@ -16,7 +16,12 @@ EM_DASH = "\u2014"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SCANNED_PREFIXES = ("src/", "tests/", "examples/", "fixtures/")
+SCANNED_PREFIXES = ("src/", "tests/", "examples/", "fixtures/", "docs/", ".github/")
+
+# Markdown catches README, LIMITATIONS, CHANGELOG, SECURITY and everything under
+# docs/. The rest catch the metadata files a reader never opens but a renderer
+# does: CITATION.cff, pyproject.toml, the CI workflow.
+SCANNED_SUFFIXES = (".md", ".cff", ".toml", ".yml", ".yaml", ".json")
 
 
 def tracked_files():
@@ -35,10 +40,10 @@ def tracked_files():
 
 
 def scanned_files():
-    """Every tracked file under src/ or tests/, plus every tracked Markdown file."""
+    """Every tracked file under a scanned directory, plus every doc and metadata file."""
     selected = []
     for name in tracked_files():
-        if name.startswith(SCANNED_PREFIXES) or name.endswith(".md"):
+        if name.startswith(SCANNED_PREFIXES) or name.endswith(SCANNED_SUFFIXES):
             path = REPO_ROOT / name
             if path.is_file():
                 selected.append(name)
@@ -48,7 +53,18 @@ def scanned_files():
 def test_scan_covers_the_expected_files():
     """Guard against the scan silently matching nothing and passing for free."""
     names = scanned_files()
-    assert "README.md" in names
+    for expected in (
+        "README.md",
+        "LIMITATIONS.md",
+        "CHANGELOG.md",
+        "SECURITY.md",
+        "CITATION.cff",
+        "pyproject.toml",
+        "docs/report-schema.md",
+        "docs/declared-channels.md",
+        ".github/workflows/ci.yml",
+    ):
+        assert expected in names, f"{expected} is not being scanned"
     assert any(name.startswith("src/runwarden/") for name in names)
     assert any(name.startswith("tests/") for name in names)
     assert any(name.startswith("examples/") for name in names)

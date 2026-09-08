@@ -4,12 +4,53 @@ build-backend = "hatchling.build"
 
 [project]
 name = "runwarden"
-version = "0.1.0.dev0"
-description = "Cross-run isolation probing for autonomous agent environments"
+version = "0.1.0"
+description = "Detect undeclared cross-run communication channels in autonomous AI agent environments"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "David", email = "21160034+webpro255@users.noreply.github.com" }]
+# PEP 639 SPDX expression rather than a "License :: OSI Approved" classifier.
+# PyPI derives the displayed license from License-Expression, and the two are
+# specified as mutually exclusive, so the classifier is left out on purpose.
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "David Race", email = "21160034+webpro255@users.noreply.github.com" }]
+keywords = [
+    "ai-agents",
+    "ai-agent-security",
+    "ai-security",
+    "llm-security",
+    "agent-isolation",
+    "sandbox-escape",
+    "cross-run",
+    "noninterference",
+    "information-flow",
+    "covert-channel",
+    "multi-agent",
+    "security-testing",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+    "Topic :: Software Development :: Testing",
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    # Every version listed here is a version the CI matrix in
+    # .github/workflows/ci.yml actually runs the suite on. Keep the two lists
+    # in step: claiming a version nobody tests is a claim, not a fact.
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/webpro255/runwarden"
+Repository = "https://github.com/webpro255/runwarden"
+Issues = "https://github.com/webpro255/runwarden/issues"
+Changelog = "https://github.com/webpro255/runwarden/blob/main/CHANGELOG.md"
 
 [project.scripts]
 runwarden = "runwarden.cli:main"
