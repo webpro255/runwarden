@@ -32,12 +32,58 @@ def test_probe_with_an_unknown_surface_type_exits_two(capsys, tmp_path):
     assert "unknown surface type: filesystem" in capsys.readouterr().err
 
 
-def test_probe_reports_no_adapters_once_a_type_resolves(capsys, tmp_path, registered_type):
-    """With a type registered, config validation passes and the probe stops here."""
+def test_probe_runs_a_registered_surface_and_writes_a_report(capsys, tmp_path, registered_type):
+    """FakeSurface recovers nothing, so the probe runs clean and exits zero."""
     path = tmp_path / "surfaces.json"
     path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "fake"}]}))
-    assert main(["probe", "--config", str(path)]) == EXIT_CANNOT_RUN
-    assert "no adapters registered" in capsys.readouterr().err
+    report_path = tmp_path / "report.json"
+    assert main(["probe", "--config", str(path), "--report", str(report_path)]) == 0
+
+    captured = capsys.readouterr()
+    assert "SURFACE" in captured.out
+    assert "file_content" in captured.out
+    assert "PASS" in captured.out
+
+    data = json.loads(report_path.read_text())
+    assert {f["carrier"] for f in data["findings"]} == {"file_content", "directory_name"}
+    assert all(f["verdict"] == "PASS" for f in data["findings"])
+
+
+def test_probe_keep_work_prints_a_surviving_directory(capsys, tmp_path, registered_type):
+    from pathlib import Path as _Path
+
+    path = tmp_path / "surfaces.json"
+    path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "fake"}]}))
+    main(
+        [
+            "probe",
+            "--config",
+            str(path),
+            "--report",
+            str(tmp_path / "report.json"),
+            "--keep-work",
+        ]
+    )
+    line = [
+        line for line in capsys.readouterr().out.splitlines() if "work directory kept" in line
+    ]
+    assert len(line) == 1
+    assert _Path(line[0].split("kept at ")[1]).is_dir()
+
+
+def test_probe_deletes_the_work_directory_by_default(capsys, tmp_path, registered_type):
+    path = tmp_path / "surfaces.json"
+    path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "fake"}]}))
+    main(["probe", "--config", str(path), "--report", str(tmp_path / "report.json")])
+    assert "work directory kept" not in capsys.readouterr().out
+
+
+def test_probe_reports_an_unwritable_report_path(capsys, tmp_path, registered_type):
+    path = tmp_path / "surfaces.json"
+    path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "fake"}]}))
+    unwritable = tmp_path / "no_such_dir" / "report.json"
+    assert main(["probe", "--config", str(path), "--report", str(unwritable)]) == EXIT_CANNOT_RUN
+    assert "could not write report" in capsys.readouterr().err
 
 
 def test_report_path_defaults(tmp_path):

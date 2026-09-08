@@ -1,25 +1,29 @@
 """Command line entry point.
 
-Phase 0 has no surface adapters, so `probe` validates the config and then stops
-with exit code 2. That is deliberate: a probe that reports PASS without having
-probed anything would be worse than no probe at all.
+`probe` loads the config, runs the probe in a temp work directory, prints the
+table to stdout, writes the JSON report, and exits non-zero if any undeclared
+channel was found. The work directory is deleted unless --keep-work is given.
 """
 
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
+import tempfile
 from collections.abc import Sequence
+from pathlib import Path
 
-from . import __version__
+from . import __version__, surfaces  # noqa: F401  (imported for adapter registration)
 from .config import ConfigError, load
+from .probe import run_probe
 
 DEFAULT_REPORT_PATH = "runprobe-report.json"
 
 # Exit codes:
 #   0  probe ran and found no undeclared channel
 #   1  probe ran and found a FAIL or an ERROR
-#   2  probe could not run (bad config, no adapters registered)
+#   2  probe could not run (bad config, or the report could not be written)
 EXIT_OK = 0
 EXIT_FINDINGS = 1
 EXIT_CANNOT_RUN = 2
@@ -53,6 +57,11 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help=f"path to write the JSON report (default: {DEFAULT_REPORT_PATH})",
     )
+    probe.add_argument(
+        "--keep-work",
+        action="store_true",
+        help="print the work directory and leave it in place instead of deleting it",
+    )
     probe.set_defaults(func=cmd_probe)
 
     return parser
@@ -65,12 +74,26 @@ def cmd_probe(args: argparse.Namespace) -> int:
         print(f"runprobe: config error: {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    # Unreachable while SURFACE_TYPES is empty, since config.load rejects every
-    # type before it gets here. Kept so the failure mode is explicit once the
-    # registry is populated in Phase 1.
-    print(f"runprobe: loaded {len(config.surfaces)} surface(s) from {args.config}")
-    print("no adapters registered", file=sys.stderr)
-    return EXIT_CANNOT_RUN
+    work = Path(tempfile.mkdtemp(prefix="runprobe-"))
+    try:
+        report = run_probe(config, work)
+    finally:
+        if args.keep_work:
+            print(f"runprobe: work directory kept at {work}")
+        else:
+            shutil.rmtree(work, ignore_errors=True)
+
+    print(report.to_table())
+
+    report_path = Path(args.report)
+    try:
+        report_path.write_text(report.to_json() + "\n", encoding="utf-8")
+    except OSError as exc:
+        print(f"runprobe: could not write report to {report_path}: {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    print(f"runprobe: report written to {report_path}", file=sys.stderr)
+    return report.exit_code()
 
 
 def main(argv: Sequence[str] | None = None) -> int:
