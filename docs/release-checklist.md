@@ -149,6 +149,15 @@ rm -rf dist/
 `twine check` must pass on both the wheel and the sdist before anything is
 uploaded.
 
+One thing to look at specifically on the TestPyPI page below: the license.
+`pyproject.toml` declares `license = "Apache-2.0"` as a PEP 639 SPDX expression
+and deliberately carries no `License :: OSI Approved :: Apache Software License`
+classifier, because the two are specified as mutually exclusive and PyPI is the
+place that enforces it. Hatchling and `twine check` both accept the classifier
+if it is added, so this could only be settled on the server. If the TestPyPI
+page shows the license correctly, which is the expected outcome, nothing needs
+changing.
+
 Do the TestPyPI dry run first. It is the only way to see the rendered page
 before the real name is spent, and a PyPI version number cannot be reused once
 uploaded:
