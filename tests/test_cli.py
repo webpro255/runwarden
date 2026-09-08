@@ -32,11 +32,8 @@ def test_probe_with_an_unknown_surface_type_exits_two(capsys, tmp_path):
     assert "unknown surface type: filesystem" in capsys.readouterr().err
 
 
-def test_probe_reports_no_adapters_once_a_type_resolves(capsys, tmp_path, monkeypatch):
+def test_probe_reports_no_adapters_once_a_type_resolves(capsys, tmp_path, registered_type):
     """With a type registered, config validation passes and the probe stops here."""
-    from runprobe.config import SURFACE_TYPES
-
-    monkeypatch.setitem(SURFACE_TYPES, "fake", "tests.fake")
     path = tmp_path / "surfaces.json"
     path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "fake"}]}))
     assert main(["probe", "--config", str(path)]) == EXIT_CANNOT_RUN

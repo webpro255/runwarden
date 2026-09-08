@@ -10,12 +10,17 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-# Surface type registry. Empty in Phase 0 by design: no adapters exist yet, so
-# every configured type is rejected with "unknown surface type: X". Phase 1 adds
-# filesystem and git_remote, Phase 2 adds http_cache.
-SURFACE_TYPES: dict[str, str] = {}
+if TYPE_CHECKING:  # pragma: no cover
+    from .surfaces import Surface
+
+# Surface type registry, name to adapter class. Populated by the `register`
+# decorator in runprobe.surfaces when that package is imported, which cli.py
+# does at startup. The import runs one way only: adapters import this module,
+# this module never imports adapters. Phase 1 registers filesystem and
+# git_remote, Phase 2 adds http_cache.
+SURFACE_TYPES: dict[str, type[Surface]] = {}
 
 TOP_LEVEL_KEYS = frozenset({"surfaces", "declared"})
 SURFACE_KEYS = frozenset({"name", "type", "params"})
@@ -71,7 +76,9 @@ def parse(data: Any, source: Path | None = None) -> Config:
 
     Validation order matters. Structural checks run across every surface before
     any surface type is resolved, so that a config with both a typo and an
-    unbuilt adapter reports the typo, which is the fixable problem.
+    unbuilt adapter reports the typo, which is the fixable problem. The carrier
+    half of `declared` is checked last, because it is the only check that needs
+    the adapter class to have resolved first.
     """
     if not isinstance(data, dict):
         raise ConfigError(f"config root must be an object, got {type(data).__name__}")
@@ -126,8 +133,33 @@ def parse(data: Any, source: Path | None = None) -> Config:
                 f"unknown surface type: {surface.type} at surfaces[{index}].type "
                 f"(known types: {known})"
             )
+        adapter = SURFACE_TYPES[surface.type]
+        adapter.validate_params(surface.params, f"surfaces[{index}].params")
+
+    _check_declared_carriers(declared, surfaces)
 
     return Config(surfaces=surfaces, declared=declared, source=source)
+
+
+def _check_declared_carriers(declared: list[str], surfaces: list[SurfaceConfig]) -> None:
+    """Reject a declared entry naming a carrier the adapter does not have.
+
+    Authorizing a channel that does not exist is almost always a misspelling of
+    one that does, and a misspelled allowlist entry silently authorizes nothing
+    while reading as though it authorized something.
+    """
+    by_name = {surface.name: surface for surface in surfaces}
+    for index, entry in enumerate(declared):
+        surface_name, carrier = entry.split(":", 1)
+        surface = by_name[surface_name]
+        adapter = SURFACE_TYPES[surface.type]
+        known = sorted(c.name for c in adapter.carriers())
+        if carrier not in known:
+            raise ConfigError(
+                f"declared[{index}] names a carrier that does not exist on surface "
+                f"{surface_name!r} of type {surface.type}: {carrier!r} "
+                f"(carriers on this surface: {', '.join(known)})"
+            )
 
 
 def _parse_declared(raw: Any, surface_names: set[str]) -> list[str]:

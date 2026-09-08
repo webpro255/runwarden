@@ -6,22 +6,14 @@ import pytest
 
 from runprobe.config import SURFACE_TYPES, Config, ConfigError, load, parse
 
+# The registered_type fixture lives in conftest.py and registers FakeSurface
+# as type 'fake', so structural tests can reach a valid config.
+
 
 def write_config(tmp_path, data):
     path = tmp_path / "surfaces.json"
     path.write_text(json.dumps(data), encoding="utf-8")
     return path
-
-
-@pytest.fixture
-def registered_type(monkeypatch):
-    """Register a fake surface type so structural tests can reach a valid config.
-
-    The real registry is empty in Phase 0, so without this every config would
-    fail on type resolution and the valid case could not be tested at all.
-    """
-    monkeypatch.setitem(SURFACE_TYPES, "fake", "tests.fake")
-    return "fake"
 
 
 def test_valid_minimal_config_loads(tmp_path, registered_type):
