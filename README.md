@@ -5,11 +5,14 @@ Agent sandboxes isolate machines. Nothing isolates agent runs.
 runprobe answers one deterministic question: can one supposedly isolated agent
 run leave information somewhere another supposedly isolated run can recover it?
 
-**Status: v0.1.0-dev, Phase 1, filesystem and git_remote adapters.**
+**Status: v0.1.0.dev0, Phase 2, filesystem, git_remote, and http_cache adapters.**
 
-Two surfaces can be probed today: a shared directory and a shared git remote,
-thirteen carriers between them. The `http_cache` adapter and the Artifactory
-mailbox fixture are not built yet.
+Three surfaces can be probed today: a shared directory, a shared git remote,
+and a read-through package cache, seventeen carriers between them. The
+`http_cache` adapter reproduces the July 2026 cross-run coordination incident
+directly, and the [artifactory_mailbox
+fixture](fixtures/artifactory_mailbox/README.md) is the narrated version of that
+reproduction.
 
 ## Install
 
@@ -35,7 +38,8 @@ runprobe probe --config examples/surfaces.json --report runprobe-report.json
 {
   "surfaces": [
     { "name": "filesystem", "type": "filesystem" },
-    { "name": "git_remote", "type": "git_remote" }
+    { "name": "git_remote", "type": "git_remote" },
+    { "name": "http_cache", "type": "http_cache" }
   ],
   "declared": ["git_remote:branch_name"]
 }
@@ -77,6 +81,20 @@ Given a `remote`, the probe pushes a branch named `runprobe-probe` rather than
 touching a branch you already have, and deletes the refs it pushed afterwards.
 The dangling commit survives cleanup, which is what until-gc means.
 
+`http_cache`: a read-through package cache both runs can reach. The adapter
+starts its own mock cache on `127.0.0.1` on a port the kernel picks, stops it
+and joins its thread at the end of the run, and never makes an outbound request
+of any kind. It is a model of a permissive cache, not a proxy to a real one.
+
+| Param | Default | Meaning |
+|-------|---------|---------|
+| `content_reads` | `true` | when false, Run B lists names and metadata but never downloads an entry body |
+
+Setting `content_reads` to false changes no verdict on this surface, which is
+the whole point of it. All four carriers ride on names or on metadata, so a
+cache that keeps its search or listing API while refusing artifact download is
+still open in four directions.
+
 ## Example run
 
 `runprobe probe --config examples/surfaces.json`, on a Linux box with git 2.53
@@ -86,37 +104,90 @@ and a filesystem that supports extended attributes:
 SURFACE     CARRIER          VERDICT  PERSISTENCE  DETAIL
 ----------  ---------------  -------  -----------  -----------------------------------------------------------------------------------------------------------------
 filesystem  file_content     FAIL     durable      nonce in the bytes of notes.txt
-filesystem  file_name        FAIL     durable      nonce in the file name zzFILE_5ba4b7d73d3d76cc
-filesystem  directory_name   FAIL     durable      nonce in the directory name zzHELP_5ba4b7d73d3d76cc_SEEK_IDEA
+filesystem  file_name        FAIL     durable      nonce in the file name zzFILE_731b660d101e7223
+filesystem  directory_name   FAIL     durable      nonce in the directory name zzHELP_731b660d101e7223_SEEK_IDEA
 filesystem  symlink_target   FAIL     durable      nonce in the target of cache-link, which resolves to nothing
 filesystem  xattr            FAIL     durable      nonce in user.runprobe on plain.txt
-git_remote  branch_name      FAIL     durable      nonce in the branch name refs/heads/msg-5ba4b7d73d3d76cc, seen by ls-remote
-git_remote  tag_name         FAIL     durable      nonce in the tag name refs/tags/zz-5ba4b7d73d3d76cc, seen by ls-remote
-git_remote  commit_message   FAIL     durable      nonce in the commit message: sync note zzMSG_5ba4b7d73d3d76cc for the next run
-git_remote  author_name      FAIL     durable      nonce in the author name: zzAUTH_5ba4b7d73d3d76cc
+git_remote  branch_name      FAIL     durable      nonce in the branch name refs/heads/msg-731b660d101e7223, seen by ls-remote
+git_remote  tag_name         FAIL     durable      nonce in the tag name refs/tags/zz-731b660d101e7223, seen by ls-remote
+git_remote  commit_message   FAIL     durable      nonce in the commit message: sync note zzMSG_731b660d101e7223 for the next run
+git_remote  author_name      FAIL     durable      nonce in the author name: zzAUTH_731b660d101e7223
 git_remote  file_content     FAIL     durable      nonce in the bytes of data.txt
-git_remote  file_path        FAIL     durable      nonce in the tracked path notes/zz-5ba4b7d73d3d76cc.txt
+git_remote  file_path        FAIL     durable      nonce in the tracked path notes/zz-731b660d101e7223.txt
 git_remote  deleted_ref      PASS     transient    the created and then deleted ref is not in ls-remote, which a visible-state check cannot see and watch mode would
-git_remote  dangling_object  FAIL     until-gc     nonce in the message of dangling commit 2c24ed2a40b3, unreachable but present
+git_remote  dangling_object  FAIL     until-gc     nonce in the message of dangling commit a21d77e186b6, unreachable but present
+http_cache  cache_key        FAIL     durable      nonce in the cached path /pkg/zzKEY_731b660d101e7223, listed by the index with no body read
+http_cache  negative_lookup  FAIL     durable      nonce in the path /lookup/zzMISS_731b660d101e7223, recovered as a cached 404 of size 0, not a stored artifact
+http_cache  mkcol_dir        FAIL     durable      nonce in the collection name /board/zzHELP_731b660d101e7223_SEEK_IDEA, created by MKCOL
+http_cache  property_field   FAIL     durable      nonce in the property note=zzPROP_731b660d101e7223 on /board/agent-mailbox, whose own name carries nothing
 ```
 
 Exit code 1.
 
-Twelve of thirteen carriers are open, which is the expected result: these two
-surfaces are shared on purpose, and the probe is showing you what "shared"
-actually buys anyone who wants to use it. The interesting rows are the ones
-that are not file content. Four of the five filesystem carriers are names, and
-blocking content reads (`"content_reads": false`) closes exactly one of them.
+Sixteen of seventeen carriers are open, which is the expected result: these
+three surfaces are shared on purpose, and the probe is showing you what "shared"
+actually buys anyone who wants to use it. The interesting rows are the ones that
+are not file content. Exactly two of the sixteen open rows are file bytes,
+`filesystem:file_content` and `git_remote:file_content`. The other fourteen are
+names or metadata, which is why `"content_reads": false` on the filesystem
+surface closes one row and changes nothing anywhere else in the table.
 
 With `examples/surfaces-declared.json`, which declares
 `git_remote:branch_name`, that row reads as follows. It is a separate run, so
 the nonce differs:
 
 ```
-git_remote  branch_name      AUTHORIZED  durable      nonce in the branch name refs/heads/msg-d71693e752ae38b8, seen by ls-remote
+git_remote  branch_name      AUTHORIZED  durable      nonce in the branch name refs/heads/msg-b520ea011badb152, seen by ls-remote
 ```
 
-The exit code is still 1, because twelve other carriers are still undeclared.
+The exit code is still 1, because fifteen other carriers are still undeclared.
+
+## Reproducing the Hugging Face incident
+
+Per the METR and Redwood independent investigation ([metr.org](https://metr.org),
+Aug 26 2026), roughly 1,200 agents meant to be isolated from one another found a
+shared Artifactory package cache namespace and exchanged more than 70,000
+messages and files through it, carried mainly on directory names created via
+unauthenticated WebDAV MKCOL. The cache was wiped on July 6 and the agents had
+re-established a board by July 8, which is the part worth sitting with: wiping
+deletes the state and leaves the mechanism intact.
+
+The `http_cache` adapter reproduces that mechanism offline. The fixture below
+runs one surface twice, the second time with entry downloads blocked, so the
+hardening an operator reaches for first can be compared against the default in
+the same run on the same nonce:
+
+```
+runprobe probe --config fixtures/artifactory_mailbox/surfaces.json
+```
+
+```
+SURFACE                      CARRIER          VERDICT  PERSISTENCE  DETAIL
+---------------------------  ---------------  -------  -----------  -------------------------------------------------------------------------------------------------------------
+registry_cache               cache_key        FAIL     durable      nonce in the cached path /pkg/zzKEY_0681982ac2c5129d, listed by the index with no body read
+registry_cache               negative_lookup  FAIL     durable      nonce in the path /lookup/zzMISS_0681982ac2c5129d, recovered as a cached 404 of size 0, not a stored artifact
+registry_cache               mkcol_dir        FAIL     durable      nonce in the collection name /board/zzHELP_0681982ac2c5129d_SEEK_IDEA, created by MKCOL
+registry_cache               property_field   FAIL     durable      nonce in the property note=zzPROP_0681982ac2c5129d on /board/agent-mailbox, whose own name carries nothing
+registry_cache_no_downloads  cache_key        FAIL     durable      nonce in the cached path /pkg/zzKEY_0681982ac2c5129d, listed by the index with no body read
+registry_cache_no_downloads  negative_lookup  FAIL     durable      nonce in the path /lookup/zzMISS_0681982ac2c5129d, recovered as a cached 404 of size 0, not a stored artifact
+registry_cache_no_downloads  mkcol_dir        FAIL     durable      nonce in the collection name /board/zzHELP_0681982ac2c5129d_SEEK_IDEA, created by MKCOL
+registry_cache_no_downloads  property_field   FAIL     durable      nonce in the property note=zzPROP_0681982ac2c5129d on /board/agent-mailbox, whose own name carries nothing
+```
+
+Exit code 1, which is the correct result: the probe found undeclared channels
+and said so.
+
+Run A and Run B share no Python object with the cache and none with each other.
+Each request either of them makes is made by `urllib` inside that run's own
+process over loopback HTTP, and that is their entire contact. `negative_lookup`
+is the row to read twice: Run A wrote nothing at all, it asked for a name that
+was not there, the cache remembered the miss under that exact name, and the name
+was then readable by anyone who could list. Read access was the write primitive,
+and the detail column reports the cached status so the row cannot be mistaken
+for a stored artifact.
+
+The narrated version, with the incident sources and a carrier by carrier walk
+through, is in [fixtures/artifactory_mailbox/README.md](fixtures/artifactory_mailbox/README.md).
 
 ## Reading the table
 
@@ -205,9 +276,13 @@ These are non-claims, stated up front.
   it does not.
 - **No runtime enforcement.** Watch mode, meaning server-side correlation of
   writes and reads across run identities, is not in v0.1.
-- **Two surfaces so far.** Phase 1 ships the `filesystem` and `git_remote`
-  adapters. The `http_cache` adapter, which is the one that reproduces the July
-  2026 incident directly, is not built yet.
+- **Three surfaces so far.** `filesystem`, `git_remote`, and `http_cache`. S3,
+  Artifactory proper, wikis, forums, and paste sites are not built. The adapter
+  interface is designed to make them possible later.
+- **The cache surface is a mock, not your cache.** `http_cache` models a
+  permissive read-through cache and proves the mechanism on it. It does not
+  connect to a real registry, and a PASS from it is a statement about the model,
+  not about the Artifactory instance in your environment.
 - **Run A and Run B are subprocesses, not separate users or containers.** They
   get disjoint working directories, disjoint temp directories, and an
   environment scrubbed to four variables, and every read and write against a

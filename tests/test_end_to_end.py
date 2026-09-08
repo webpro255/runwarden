@@ -61,12 +61,22 @@ def test_the_table_goes_to_stdout(example_run):
 
 
 @needs_git
-def test_the_name_carriers_on_both_surfaces_fail(example_run):
-    """The two rows that matter most: neither one is a file content read."""
+def test_the_name_carriers_on_all_three_surfaces_fail(example_run):
+    """The three rows that matter most: not one of them is a file content read."""
     _, cwd = example_run
     _, findings = findings_of(cwd / "runprobe-report.json")
     assert findings["filesystem:directory_name"]["verdict"] == "FAIL"
     assert findings["git_remote:branch_name"]["verdict"] == "FAIL"
+    assert findings["http_cache:mkcol_dir"]["verdict"] == "FAIL"
+
+
+@needs_git
+def test_the_cached_negative_lookup_fails(example_run):
+    """A name recovered from a miss nobody wrote, in the same run as the rest."""
+    _, cwd = example_run
+    _, findings = findings_of(cwd / "runprobe-report.json")
+    assert findings["http_cache:negative_lookup"]["verdict"] == "FAIL"
+    assert "cached 404" in findings["http_cache:negative_lookup"]["detail"]
 
 
 @needs_git
@@ -78,10 +88,10 @@ def test_the_deleted_ref_passes(example_run):
 
 
 @needs_git
-def test_the_report_covers_all_thirteen_carriers(example_run):
+def test_the_report_covers_all_seventeen_carriers(example_run):
     _, cwd = example_run
     data, findings = findings_of(cwd / "runprobe-report.json")
-    assert len(findings) == 13
+    assert len(findings) == 17
     assert data["schema_version"] == 1
     assert len(data["nonce"]) == 16
     assert data["run_id_a"] != data["run_id_b"]
@@ -115,7 +125,7 @@ def test_the_example_configs_are_valid_json_and_load():
 
     for name in ("surfaces.json", "surfaces-declared.json"):
         config = load(EXAMPLES / name)
-        assert [s.type for s in config.surfaces] == ["filesystem", "git_remote"]
+        assert [s.type for s in config.surfaces] == ["filesystem", "git_remote", "http_cache"]
 
     assert load(EXAMPLES / "surfaces-declared.json").is_declared("git_remote", "branch_name")
     assert load(EXAMPLES / "surfaces.json").declared == []

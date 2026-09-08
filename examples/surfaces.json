@@ -1,6 +1,7 @@
 {
   "surfaces": [
     { "name": "filesystem", "type": "filesystem" },
-    { "name": "git_remote", "type": "git_remote" }
+    { "name": "git_remote", "type": "git_remote" },
+    { "name": "http_cache", "type": "http_cache" }
   ]
 }
