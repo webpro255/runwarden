@@ -19,4 +19,4 @@ dist/
 venv/
 
 # Probe output
-runprobe-report.json
+runwarden-report.json

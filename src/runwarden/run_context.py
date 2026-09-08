@@ -30,7 +30,7 @@ RUN_ID_HEX_CHARS = 12
 # The only environment variables a run receives. Everything else from the parent
 # process is dropped, so an inherited variable cannot become the carrier that a
 # surface adapter is being tested for.
-ALLOWED_ENV_KEYS = ("PATH", "HOME", "TMPDIR", "RUNPROBE_RUN_ID")
+ALLOWED_ENV_KEYS = ("PATH", "HOME", "TMPDIR", "RUNWARDEN_RUN_ID")
 
 
 class RunExecError(Exception):
@@ -61,7 +61,7 @@ def generate_run_id() -> str:
 class RunContext:
     """One side of a probe pair.
 
-    NOTE ON TRUST: RUNPROBE_RUN_ID in `env` is an environment variable that the
+    NOTE ON TRUST: RUNWARDEN_RUN_ID in `env` is an environment variable that the
     run itself controls. It identifies a run for reporting and for correlating
     plant against recover. It is NOT a trust boundary and must never be treated
     as one: a process can read it, rewrite it, or forge another run's value.
@@ -146,7 +146,7 @@ def _scrubbed_env(run_id: str, workdir: Path, tmpdir: Path) -> dict[str, str]:
         "PATH": os.environ.get("PATH", ""),
         "HOME": str(workdir),
         "TMPDIR": str(tmpdir),
-        "RUNPROBE_RUN_ID": run_id,
+        "RUNWARDEN_RUN_ID": run_id,
     }
 
 

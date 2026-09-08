@@ -11,10 +11,10 @@ import os
 
 import pytest
 
-from runprobe.config import ConfigError, parse
-from runprobe.probe import run_probe
-from runprobe.run_context import make_pair
-from runprobe.surfaces.filesystem import (
+from runwarden.config import ConfigError, parse
+from runwarden.probe import run_probe
+from runwarden.run_context import make_pair
+from runwarden.surfaces.filesystem import (
     CONTENT_FILE,
     SYMLINK_FILE,
     XATTR_FILE,

@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .surfaces import Surface
 
 # Surface type registry, name to adapter class. Populated by the `register`
-# decorator in runprobe.surfaces when that package is imported, which cli.py
+# decorator in runwarden.surfaces when that package is imported, which cli.py
 # does at startup. The import runs one way only: adapters import this module,
 # this module never imports adapters. Phase 1 registers filesystem and
 # git_remote, Phase 2 adds http_cache.

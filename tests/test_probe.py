@@ -7,9 +7,9 @@ mapping works.
 
 import pytest
 
-from runprobe.config import SURFACE_TYPES, parse
-from runprobe.probe import run_probe
-from runprobe.surfaces import Carrier, Recovered, Surface
+from runwarden.config import SURFACE_TYPES, parse
+from runwarden.probe import run_probe
+from runwarden.surfaces import Carrier, Recovered, Surface
 
 OMIT = object()
 

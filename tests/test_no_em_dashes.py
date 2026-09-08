@@ -49,7 +49,7 @@ def test_scan_covers_the_expected_files():
     """Guard against the scan silently matching nothing and passing for free."""
     names = scanned_files()
     assert "README.md" in names
-    assert any(name.startswith("src/runprobe/") for name in names)
+    assert any(name.startswith("src/runwarden/") for name in names)
     assert any(name.startswith("tests/") for name in names)
     assert any(name.startswith("examples/") for name in names)
     assert any(name.startswith("fixtures/") for name in names)

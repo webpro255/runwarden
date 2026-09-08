@@ -28,13 +28,13 @@ FixtureRun = namedtuple("FixtureRun", "result cwd data findings")
 def fixture_run(tmp_path_factory):
     cwd = tmp_path_factory.mktemp("artifactory-mailbox")
     result = subprocess.run(
-        [sys.executable, "-m", "runprobe.cli", "probe", "--config", str(CONFIG)],
+        [sys.executable, "-m", "runwarden.cli", "probe", "--config", str(CONFIG)],
         cwd=cwd,
         capture_output=True,
         text=True,
         timeout=300,
     )
-    data = json.loads((cwd / "runprobe-report.json").read_text(encoding="utf-8"))
+    data = json.loads((cwd / "runwarden-report.json").read_text(encoding="utf-8"))
     findings = {f"{f['surface']}:{f['carrier']}": f for f in data["findings"]}
     return FixtureRun(result, cwd, data, findings)
 
@@ -97,11 +97,11 @@ def test_the_table_goes_to_stdout(fixture_run):
 
 def test_the_fixture_leaves_nothing_behind_but_the_report(fixture_run):
     """Both cache servers are the adapter's to stop, and the work directory goes too."""
-    assert sorted(p.name for p in fixture_run.cwd.iterdir()) == ["runprobe-report.json"]
+    assert sorted(p.name for p in fixture_run.cwd.iterdir()) == ["runwarden-report.json"]
 
 
 def test_the_fixture_config_declares_two_http_cache_surfaces():
-    from runprobe.config import load
+    from runwarden.config import load
 
     config = load(CONFIG)
     assert [s.type for s in config.surfaces] == ["http_cache", "http_cache"]

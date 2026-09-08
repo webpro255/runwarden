@@ -134,7 +134,7 @@ def run_probe(config: Config, work: Path) -> Report:
                 # Reporting it as a finding would mean a leftover temp
                 # directory could fail a run that found no channel at all.
                 print(
-                    f"runprobe: cleanup failed for surface {live.name}: {_describe(exc)}",
+                    f"runwarden: cleanup failed for surface {live.name}: {_describe(exc)}",
                     file=sys.stderr,
                 )
 

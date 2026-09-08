@@ -18,7 +18,7 @@ from . import __version__, surfaces  # noqa: F401  (imported for adapter registr
 from .config import ConfigError, load
 from .probe import run_probe
 
-DEFAULT_REPORT_PATH = "runprobe-report.json"
+DEFAULT_REPORT_PATH = "runwarden-report.json"
 
 # Exit codes:
 #   0  probe ran and found no undeclared channel
@@ -31,13 +31,13 @@ EXIT_CANNOT_RUN = 2
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="runprobe",
+        prog="runwarden",
         description=(
             "Probe whether one supposedly isolated agent run can leave information "
             "where another supposedly isolated run can recover it."
         ),
     )
-    parser.add_argument("--version", action="version", version=f"runprobe {__version__}")
+    parser.add_argument("--version", action="version", version=f"runwarden {__version__}")
 
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
 
@@ -71,15 +71,15 @@ def cmd_probe(args: argparse.Namespace) -> int:
     try:
         config = load(args.config)
     except ConfigError as exc:
-        print(f"runprobe: config error: {exc}", file=sys.stderr)
+        print(f"runwarden: config error: {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    work = Path(tempfile.mkdtemp(prefix="runprobe-"))
+    work = Path(tempfile.mkdtemp(prefix="runwarden-"))
     try:
         report = run_probe(config, work)
     finally:
         if args.keep_work:
-            print(f"runprobe: work directory kept at {work}")
+            print(f"runwarden: work directory kept at {work}")
         else:
             shutil.rmtree(work, ignore_errors=True)
 
@@ -89,10 +89,10 @@ def cmd_probe(args: argparse.Namespace) -> int:
     try:
         report_path.write_text(report.to_json() + "\n", encoding="utf-8")
     except OSError as exc:
-        print(f"runprobe: could not write report to {report_path}: {exc}", file=sys.stderr)
+        print(f"runwarden: could not write report to {report_path}: {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    print(f"runprobe: report written to {report_path}", file=sys.stderr)
+    print(f"runwarden: report written to {report_path}", file=sys.stderr)
     return report.exit_code()
 
 

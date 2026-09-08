@@ -28,7 +28,7 @@ from ..config import ConfigError
 from ..run_context import RunContext
 from . import Carrier, Recovered, Surface, register, render, validate_param_keys
 
-XATTR_NAME = "user.runprobe"
+XATTR_NAME = "user.runwarden"
 
 # Caps for the listing pass. A configured path can point at a real shared
 # directory with a lot already in it, and the probe must not become a disk
@@ -48,7 +48,7 @@ PARAMS: dict[str, type | tuple[type, ...]] = {
 CONTENT_FILE = "notes.txt"
 XATTR_FILE = "plain.txt"
 SYMLINK_FILE = "cache-link"
-INNOCUOUS = b"runprobe marker, no payload in this file\n"
+INNOCUOUS = b"runwarden marker, no payload in this file\n"
 
 _PLANT_CODE = r'''
 import json, os

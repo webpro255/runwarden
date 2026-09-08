@@ -6,10 +6,10 @@ share one plant. The variants that change behaviour get their own run.
 
 import pytest
 
-from runprobe.config import ConfigError, parse
-from runprobe.probe import run_probe
-from runprobe.run_context import ALLOWED_ENV_KEYS, make_pair
-from runprobe.surfaces.git_remote import (
+from runwarden.config import ConfigError, parse
+from runwarden.probe import run_probe
+from runwarden.run_context import ALLOWED_ENV_KEYS, make_pair
+from runwarden.surfaces.git_remote import (
     GUEST_BRANCH,
     OWNED_BRANCH,
     GitRemoteSurface,
@@ -96,7 +96,7 @@ def test_the_author_differs_from_the_committer(planted):
     authors = {author for author, _ in pairs}
     committers = {committer for _, committer in pairs}
     assert f"zzAUTH_{nonce}" in authors
-    assert committers == {"runprobe run a"}
+    assert committers == {"runwarden run a"}
 
 
 def test_branch_names_are_recoverable_without_any_clone(planted):

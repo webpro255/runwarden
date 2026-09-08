@@ -8,15 +8,15 @@ import json
 
 import pytest
 
-from runprobe.config import SURFACE_TYPES, ConfigError, parse
-from runprobe.report import PERSISTENCE_CLASSES
-from runprobe.surfaces import Carrier, Recovered, Surface, register, validate_param_keys
+from runwarden.config import SURFACE_TYPES, ConfigError, parse
+from runwarden.report import PERSISTENCE_CLASSES
+from runwarden.surfaces import Carrier, Recovered, Surface, register, validate_param_keys
 
 
 @pytest.fixture
 def clean_registry(monkeypatch):
     """Give a test its own copy of the registry so register() cannot leak."""
-    monkeypatch.setattr("runprobe.config.SURFACE_TYPES", dict(SURFACE_TYPES))
+    monkeypatch.setattr("runwarden.config.SURFACE_TYPES", dict(SURFACE_TYPES))
     return None
 
 
@@ -99,7 +99,7 @@ def test_surface_copies_params_rather_than_aliasing_them(tmp_path):
 
 def test_register_inserts_the_class_into_the_registry(clean_registry):
     adapter = register(make_adapter("registered_here"))
-    from runprobe.config import SURFACE_TYPES as live
+    from runwarden.config import SURFACE_TYPES as live
 
     assert live["registered_here"] is adapter
 

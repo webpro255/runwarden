@@ -7,8 +7,8 @@ separate concerns and the tests keep them separate.
 
 import pytest
 
-from runprobe.config import SURFACE_TYPES
-from runprobe.surfaces import Carrier, Recovered, Surface, validate_param_keys
+from runwarden.config import SURFACE_TYPES
+from runwarden.surfaces import Carrier, Recovered, Surface, validate_param_keys
 
 
 class FakeSurface(Surface):

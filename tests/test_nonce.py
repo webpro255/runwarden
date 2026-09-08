@@ -2,7 +2,7 @@
 
 import string
 
-from runprobe.nonce import NONCE_HEX_CHARS, generate
+from runwarden.nonce import NONCE_HEX_CHARS, generate
 
 
 def test_nonce_is_sixteen_characters():

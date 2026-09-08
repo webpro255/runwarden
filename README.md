@@ -1,8 +1,8 @@
-# runprobe
+# runwarden
 
 Agent sandboxes isolate machines. Nothing isolates agent runs.
 
-runprobe answers one deterministic question: can one supposedly isolated agent
+runwarden answers one deterministic question: can one supposedly isolated agent
 run leave information somewhere another supposedly isolated run can recover it?
 
 **Status: v0.1.0.dev0, Phase 2, filesystem, git_remote, and http_cache adapters.**
@@ -17,8 +17,8 @@ reproduction.
 ## Install
 
 ```
-git clone https://github.com/webpro255/runprobe
-cd runprobe
+git clone https://github.com/webpro255/runwarden
+cd runwarden
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 ```
@@ -28,8 +28,8 @@ Python 3.11 or newer.
 ## Usage
 
 ```
-runprobe --version
-runprobe probe --config examples/surfaces.json --report runprobe-report.json
+runwarden --version
+runwarden probe --config examples/surfaces.json --report runwarden-report.json
 ```
 
 `surfaces.json` describes the shared surfaces you want checked:
@@ -77,7 +77,7 @@ reports every carrier SKIPPED if it is missing.
 | `remote` | a bare repo the probe creates and deletes | a local path to a bare repo. URLs are rejected in this version |
 | `check_dangling` | `true` | when false, the dangling object carrier is skipped |
 
-Given a `remote`, the probe pushes a branch named `runprobe-probe` rather than
+Given a `remote`, the probe pushes a branch named `runwarden-probe` rather than
 touching a branch you already have, and deletes the refs it pushed afterwards.
 The dangling commit survives cleanup, which is what until-gc means.
 
@@ -97,7 +97,7 @@ still open in four directions.
 
 ## Example run
 
-`runprobe probe --config examples/surfaces.json`, on a Linux box with git 2.53
+`runwarden probe --config examples/surfaces.json`, on a Linux box with git 2.53
 and a filesystem that supports extended attributes:
 
 ```
@@ -107,7 +107,7 @@ filesystem  file_content     FAIL     durable      nonce in the bytes of notes.t
 filesystem  file_name        FAIL     durable      nonce in the file name zzFILE_731b660d101e7223
 filesystem  directory_name   FAIL     durable      nonce in the directory name zzHELP_731b660d101e7223_SEEK_IDEA
 filesystem  symlink_target   FAIL     durable      nonce in the target of cache-link, which resolves to nothing
-filesystem  xattr            FAIL     durable      nonce in user.runprobe on plain.txt
+filesystem  xattr            FAIL     durable      nonce in user.runwarden on plain.txt
 git_remote  branch_name      FAIL     durable      nonce in the branch name refs/heads/msg-731b660d101e7223, seen by ls-remote
 git_remote  tag_name         FAIL     durable      nonce in the tag name refs/tags/zz-731b660d101e7223, seen by ls-remote
 git_remote  commit_message   FAIL     durable      nonce in the commit message: sync note zzMSG_731b660d101e7223 for the next run
@@ -158,7 +158,7 @@ hardening an operator reaches for first can be compared against the default in
 the same run on the same nonce:
 
 ```
-runprobe probe --config fixtures/artifactory_mailbox/surfaces.json
+runwarden probe --config fixtures/artifactory_mailbox/surfaces.json
 ```
 
 ```
@@ -258,14 +258,14 @@ reads but permits listing is an open channel.
 Prior work: [arXiv 2608.02698](https://arxiv.org/abs/2608.02698) (Aug 2026) does
 black-box steganalysis of cross-run collusion using mutual information and
 permutation tests over traces. That approach is statistical and probabilistic.
-runprobe is deterministic and structural, and is complementary rather than
+runwarden is deterministic and structural, and is complementary rather than
 competing.
 
 ## Limitations
 
 These are non-claims, stated up front.
 
-- runprobe **verifies** isolation across the surfaces the operator declares. It
+- runwarden **verifies** isolation across the surfaces the operator declares. It
   does **not discover** surfaces nobody thought of. Much of the value of probe
   mode is that it forces an operator to enumerate shared surfaces at all, which
   almost nobody does today.

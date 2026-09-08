@@ -324,7 +324,7 @@ class CacheServer:
         self._thread = threading.Thread(
             target=httpd.serve_forever,
             args=(POLL_INTERVAL_SECONDS,),
-            name="runprobe-cache-server",
+            name="runwarden-cache-server",
             daemon=True,
         )
         self._thread.start()

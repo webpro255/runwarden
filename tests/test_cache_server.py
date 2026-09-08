@@ -16,7 +16,7 @@ import urllib.request
 
 import pytest
 
-from runprobe.surfaces._cache_server import INDEX_PATH, LOOPBACK, CacheServer
+from runwarden.surfaces._cache_server import INDEX_PATH, LOOPBACK, CacheServer
 
 TIMEOUT_SECONDS = 5.0
 

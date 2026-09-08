@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from runprobe import __version__
-from runprobe.cli import EXIT_CANNOT_RUN, main
+from runwarden import __version__
+from runwarden.cli import EXIT_CANNOT_RUN, main
 
 
 def test_version_flag_prints_the_version(capsys):
@@ -17,7 +17,7 @@ def test_version_flag_prints_the_version(capsys):
 
 def test_no_command_prints_help_and_exits_two(capsys):
     assert main([]) == EXIT_CANNOT_RUN
-    assert "usage: runprobe" in capsys.readouterr().err
+    assert "usage: runwarden" in capsys.readouterr().err
 
 
 def test_probe_with_a_missing_config_exits_two(capsys, tmp_path):
@@ -87,10 +87,10 @@ def test_probe_reports_an_unwritable_report_path(capsys, tmp_path, registered_ty
 
 
 def test_report_path_defaults(tmp_path):
-    from runprobe.cli import build_parser
+    from runwarden.cli import build_parser
 
     args = build_parser().parse_args(["probe", "--config", "surfaces.json"])
-    assert args.report == "runprobe-report.json"
+    assert args.report == "runwarden-report.json"
     args = build_parser().parse_args(
         ["probe", "--config", "surfaces.json", "--report", "out.json"]
     )

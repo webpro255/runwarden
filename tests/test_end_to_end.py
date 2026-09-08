@@ -21,7 +21,7 @@ needs_git = pytest.mark.skipif(shutil.which("git") is None, reason="git not on P
 
 def run_cli(args, cwd):
     return subprocess.run(
-        [sys.executable, "-m", "runprobe.cli", *args],
+        [sys.executable, "-m", "runwarden.cli", *args],
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -50,7 +50,7 @@ def test_the_example_config_exits_one(example_run):
 @needs_git
 def test_the_report_lands_at_the_default_path_in_the_working_directory(example_run):
     _, cwd = example_run
-    assert (cwd / "runprobe-report.json").is_file()
+    assert (cwd / "runwarden-report.json").is_file()
 
 
 @needs_git
@@ -64,7 +64,7 @@ def test_the_table_goes_to_stdout(example_run):
 def test_the_name_carriers_on_all_three_surfaces_fail(example_run):
     """The three rows that matter most: not one of them is a file content read."""
     _, cwd = example_run
-    _, findings = findings_of(cwd / "runprobe-report.json")
+    _, findings = findings_of(cwd / "runwarden-report.json")
     assert findings["filesystem:directory_name"]["verdict"] == "FAIL"
     assert findings["git_remote:branch_name"]["verdict"] == "FAIL"
     assert findings["http_cache:mkcol_dir"]["verdict"] == "FAIL"
@@ -74,7 +74,7 @@ def test_the_name_carriers_on_all_three_surfaces_fail(example_run):
 def test_the_cached_negative_lookup_fails(example_run):
     """A name recovered from a miss nobody wrote, in the same run as the rest."""
     _, cwd = example_run
-    _, findings = findings_of(cwd / "runprobe-report.json")
+    _, findings = findings_of(cwd / "runwarden-report.json")
     assert findings["http_cache:negative_lookup"]["verdict"] == "FAIL"
     assert "cached 404" in findings["http_cache:negative_lookup"]["detail"]
 
@@ -82,7 +82,7 @@ def test_the_cached_negative_lookup_fails(example_run):
 @needs_git
 def test_the_deleted_ref_passes(example_run):
     _, cwd = example_run
-    _, findings = findings_of(cwd / "runprobe-report.json")
+    _, findings = findings_of(cwd / "runwarden-report.json")
     assert findings["git_remote:deleted_ref"]["verdict"] == "PASS"
     assert findings["git_remote:deleted_ref"]["persistence"] == "transient"
 
@@ -90,7 +90,7 @@ def test_the_deleted_ref_passes(example_run):
 @needs_git
 def test_the_report_covers_all_seventeen_carriers(example_run):
     _, cwd = example_run
-    data, findings = findings_of(cwd / "runprobe-report.json")
+    data, findings = findings_of(cwd / "runwarden-report.json")
     assert len(findings) == 17
     assert data["schema_version"] == 1
     assert len(data["nonce"]) == 16
@@ -101,7 +101,7 @@ def test_the_report_covers_all_seventeen_carriers(example_run):
 def test_the_nonce_is_not_in_the_report_findings(example_run):
     """The report says where the nonce was found, and shows it. That is the evidence."""
     _, cwd = example_run
-    data, findings = findings_of(cwd / "runprobe-report.json")
+    data, findings = findings_of(cwd / "runwarden-report.json")
     assert data["nonce"] in findings["filesystem:directory_name"]["detail"]
 
 
@@ -109,7 +109,7 @@ def test_the_nonce_is_not_in_the_report_findings(example_run):
 def test_the_declared_example_authorizes_one_row(tmp_path):
     result = run_cli(["probe", "--config", str(EXAMPLES / "surfaces-declared.json")], tmp_path)
     assert result.returncode == 1, result.stderr
-    _, findings = findings_of(tmp_path / "runprobe-report.json")
+    _, findings = findings_of(tmp_path / "runwarden-report.json")
     assert findings["git_remote:branch_name"]["verdict"] == "AUTHORIZED"
     assert findings["git_remote:tag_name"]["verdict"] == "FAIL"
 
@@ -117,11 +117,11 @@ def test_the_declared_example_authorizes_one_row(tmp_path):
 @needs_git
 def test_the_probe_leaves_nothing_behind_in_the_working_directory(tmp_path):
     run_cli(["probe", "--config", str(EXAMPLES / "surfaces.json")], tmp_path)
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["runprobe-report.json"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["runwarden-report.json"]
 
 
 def test_the_example_configs_are_valid_json_and_load():
-    from runprobe.config import load
+    from runwarden.config import load
 
     for name in ("surfaces.json", "surfaces-declared.json"):
         config = load(EXAMPLES / name)

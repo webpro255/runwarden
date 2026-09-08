@@ -40,7 +40,7 @@ contact between them.
 ## Running it
 
 ```
-runprobe probe --config fixtures/artifactory_mailbox/surfaces.json
+runwarden probe --config fixtures/artifactory_mailbox/surfaces.json
 ```
 
 No `demo.py`. The fixture is a config file because that is what an operator

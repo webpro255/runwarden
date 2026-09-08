@@ -14,11 +14,11 @@ import json
 
 import pytest
 
-from runprobe.config import ConfigError, parse
-from runprobe.probe import run_probe
-from runprobe.run_context import make_pair
-from runprobe.surfaces._cache_server import INDEX_PATH, LOOPBACK
-from runprobe.surfaces.http_cache import (
+from runwarden.config import ConfigError, parse
+from runwarden.probe import run_probe
+from runwarden.run_context import make_pair
+from runwarden.surfaces._cache_server import INDEX_PATH, LOOPBACK
+from runwarden.surfaces.http_cache import (
     BOARD_PREFIX,
     KEY_PREFIX,
     MAILBOX_PATH,
@@ -309,7 +309,7 @@ def test_recover_fails_closed_when_the_index_cannot_be_read(tmp_path, plant, mon
 
 
 def test_a_failing_plant_becomes_error_rows_and_a_non_zero_exit(tmp_path, monkeypatch):
-    from runprobe.surfaces import http_cache as module
+    from runwarden.surfaces import http_cache as module
 
     def boom(self, nonce, run):
         raise RuntimeError("plant exploded")

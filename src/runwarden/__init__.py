@@ -1,4 +1,4 @@
-"""runprobe: cross-run isolation probing for autonomous agent environments.
+"""runwarden: cross-run isolation probing for autonomous agent environments.
 
 Answers one deterministic question: can one supposedly isolated agent run leave
 information somewhere another supposedly isolated run can recover it?

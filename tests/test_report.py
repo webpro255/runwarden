@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from runprobe.report import (
+from runwarden.report import (
     FAILING_VERDICTS,
     PERSISTENCE_CLASSES,
     VERDICTS,

@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from runprobe.config import SURFACE_TYPES, Config, ConfigError, load, parse
+from runwarden.config import SURFACE_TYPES, Config, ConfigError, load, parse
 
 # The registered_type fixture lives in conftest.py and registers FakeSurface
 # as type 'fake', so structural tests can reach a valid config.
@@ -122,7 +122,7 @@ def test_unknown_surface_type_errors_with_the_type_name():
 
 def test_the_registry_holds_exactly_the_adapters_built_so_far():
     """A type that appears here without a test file is a type nobody probed."""
-    import runprobe.surfaces  # noqa: F401  (import registers the adapters)
+    import runwarden.surfaces  # noqa: F401  (import registers the adapters)
 
     assert set(SURFACE_TYPES) == {"filesystem", "git_remote", "http_cache"}
 

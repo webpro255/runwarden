@@ -11,7 +11,7 @@ import sys
 
 import pytest
 
-from runprobe.run_context import (
+from runwarden.run_context import (
     ALLOWED_ENV_KEYS,
     RunContext,
     RunExecError,
@@ -19,7 +19,7 @@ from runprobe.run_context import (
     make_pair,
 )
 
-CANARY_NAME = "RUNPROBE_TEST_CANARY"
+CANARY_NAME = "RUNWARDEN_TEST_CANARY"
 
 
 def test_pair_has_different_run_ids(tmp_path):
@@ -77,12 +77,12 @@ def test_env_home_and_tmpdir_point_at_the_run_directories(tmp_path):
     for run in (run_a, run_b):
         assert run.env["HOME"] == str(run.workdir)
         assert run.env["TMPDIR"] == str(run.tmpdir)
-        assert run.env["RUNPROBE_RUN_ID"] == run.run_id
+        assert run.env["RUNWARDEN_RUN_ID"] == run.run_id
 
 
 def test_run_ids_in_env_are_not_shared(tmp_path):
     run_a, run_b = make_pair(tmp_path)
-    assert run_a.env["RUNPROBE_RUN_ID"] != run_b.env["RUNPROBE_RUN_ID"]
+    assert run_a.env["RUNWARDEN_RUN_ID"] != run_b.env["RUNWARDEN_RUN_ID"]
 
 
 def test_label_must_be_a_or_b(tmp_path):
@@ -104,7 +104,7 @@ def test_run_id_length_is_enforced(tmp_path):
 def test_make_context_accepts_an_explicit_run_id(tmp_path):
     run = make_context(tmp_path, "A", run_id="0123456789ab")
     assert run.run_id == "0123456789ab"
-    assert run.env["RUNPROBE_RUN_ID"] == "0123456789ab"
+    assert run.env["RUNWARDEN_RUN_ID"] == "0123456789ab"
 
 
 def test_exec_runs_in_the_run_workdir(tmp_path):
@@ -154,7 +154,7 @@ def test_exec_child_python_sees_no_parent_variable(tmp_path, monkeypatch):
 def test_exec_child_env_run_id_matches_the_context(tmp_path):
     run_a, run_b = make_pair(tmp_path)
     for run in (run_a, run_b):
-        code = "import os; print(os.environ['RUNPROBE_RUN_ID'])"
+        code = "import os; print(os.environ['RUNWARDEN_RUN_ID'])"
         assert run.exec([sys.executable, "-c", code]).stdout.decode().strip() == run.run_id
 
 
@@ -206,7 +206,7 @@ def test_exec_times_out(tmp_path):
 
 def test_python_runs_code_in_the_run_context(tmp_path):
     run_a, _ = make_pair(tmp_path)
-    code = "import os; print(os.getcwd()); print(os.environ['RUNPROBE_RUN_ID'])"
+    code = "import os; print(os.getcwd()); print(os.environ['RUNWARDEN_RUN_ID'])"
     lines = run_a.python(code).stdout.decode().splitlines()
     assert lines == [str(run_a.workdir), run_a.run_id]
 

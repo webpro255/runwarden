@@ -39,15 +39,15 @@ PARAMS: dict[str, type | tuple[type, ...]] = {
 GIT_TIMEOUT_SECONDS = 120.0
 
 # Reserved by RFC 2606, so nothing here can resolve to a real host.
-RUN_A_NAME = "runprobe run a"
-RUN_A_EMAIL = "run-a@runprobe.invalid"
+RUN_A_NAME = "runwarden run a"
+RUN_A_EMAIL = "run-a@runwarden.invalid"
 
 # The branch that carries the commit, author, content, and path carriers. When
 # the adapter created the bare repo it uses a normal default name. When the
 # operator supplied a remote, the probe stays out of the way of their branches
 # and pushes a clearly labelled one instead, which cleanup then deletes.
 OWNED_BRANCH = "main"
-GUEST_BRANCH = "runprobe-probe"
+GUEST_BRANCH = "runwarden-probe"
 
 _URL_SCHEME = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*://")
 _SCP_SYNTAX = re.compile(r"^[^/]+@[^/]+:")
