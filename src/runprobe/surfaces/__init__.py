@@ -193,4 +193,5 @@ def _type_name(expected: type | tuple[type, ...]) -> str:
 from . import (  # noqa: E402,F401
     filesystem,
     git_remote,
+    http_cache,
 )
