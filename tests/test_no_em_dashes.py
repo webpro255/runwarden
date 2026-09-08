@@ -16,7 +16,7 @@ EM_DASH = "\u2014"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SCANNED_PREFIXES = ("src/", "tests/")
+SCANNED_PREFIXES = ("src/", "tests/", "examples/")
 
 
 def tracked_files():
@@ -51,6 +51,7 @@ def test_scan_covers_the_expected_files():
     assert "README.md" in names
     assert any(name.startswith("src/runprobe/") for name in names)
     assert any(name.startswith("tests/") for name in names)
+    assert any(name.startswith("examples/") for name in names)
 
 
 def test_no_em_dashes_in_tracked_source_and_docs():

@@ -1,0 +1,7 @@
+{
+  "surfaces": [
+    { "name": "filesystem", "type": "filesystem" },
+    { "name": "git_remote", "type": "git_remote" }
+  ],
+  "declared": ["git_remote:branch_name"]
+}
