@@ -1,2 +1,22 @@
 PLAN.md
 .prompts/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Test and lint caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Environments
+.venv/
+venv/
+
+# Probe output
+runprobe-report.json

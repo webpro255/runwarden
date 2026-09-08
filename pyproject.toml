@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "runprobe"
+version = "0.0.1"
+description = "Cross-run isolation probing for autonomous agent environments"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "David", email = "21160034+webpro255@users.noreply.github.com" }]
+dependencies = []
+
+[project.scripts]
+runprobe = "runprobe.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/runprobe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
