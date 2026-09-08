@@ -20,14 +20,13 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shutil
 from pathlib import Path
 from typing import Any
 
 from ..config import ConfigError
 from ..run_context import RunContext
-from . import Carrier, Recovered, Surface, register, validate_param_keys
+from . import Carrier, Recovered, Surface, register, render, validate_param_keys
 
 XATTR_NAME = "user.runprobe"
 
@@ -162,18 +161,6 @@ for name in names:
 
 print(json.dumps(out))
 '''
-
-
-def render(template: str, **values: Any) -> str:
-    """Substitute Python literals for placeholder tokens in a code template.
-
-    One pass with a single alternation, so a substituted value that happens to
-    contain another placeholder name cannot be substituted again. repr of a str,
-    a bool, an int, or bytes is a valid Python literal, so a path or a nonce
-    cannot inject code, and no shell is involved at any point.
-    """
-    pattern = re.compile(r"\b(" + "|".join(sorted(values, key=len, reverse=True)) + r")\b")
-    return pattern.sub(lambda match: repr(values[match.group(1)]), template)
 
 
 @register

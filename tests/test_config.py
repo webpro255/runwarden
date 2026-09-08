@@ -124,7 +124,7 @@ def test_the_registry_holds_exactly_the_adapters_built_so_far():
     """A type that appears here without a test file is a type nobody probed."""
     import runprobe.surfaces  # noqa: F401  (import registers the adapters)
 
-    assert set(SURFACE_TYPES) == {"filesystem"}
+    assert set(SURFACE_TYPES) == {"filesystem", "git_remote"}
 
 
 def test_missing_surface_name_errors():

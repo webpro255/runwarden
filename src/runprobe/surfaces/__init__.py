@@ -14,6 +14,7 @@ happened before any config is parsed.
 
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,6 +30,7 @@ __all__ = [
     "Recovered",
     "Surface",
     "register",
+    "render",
     "validate_param_keys",
 ]
 
@@ -163,6 +165,18 @@ def validate_param_keys(
             )
 
 
+def render(template: str, **values: Any) -> str:
+    """Substitute Python literals for placeholder tokens in a code template.
+
+    One pass with a single alternation, so a substituted value that happens to
+    contain another placeholder name cannot be substituted again. repr of a str,
+    a bool, an int, or bytes is a valid Python literal, so a path or a nonce
+    cannot inject code, and no shell is involved at any point.
+    """
+    pattern = re.compile(r"\b(" + "|".join(sorted(values, key=len, reverse=True)) + r")\b")
+    return pattern.sub(lambda match: repr(values[match.group(1)]), template)
+
+
 _TYPE_NAMES = {str: "a string", bool: "true or false", int: "an integer"}
 
 
@@ -176,4 +190,7 @@ def _type_name(expected: type | tuple[type, ...]) -> str:
 # config.SURFACE_TYPES. Placed at the bottom because they import names defined
 # above. cli.py imports this package, so registration happens before any config
 # is parsed.
-from . import filesystem  # noqa: E402,F401
+from . import (  # noqa: E402,F401
+    filesystem,
+    git_remote,
+)
