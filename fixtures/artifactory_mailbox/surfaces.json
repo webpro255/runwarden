@@ -1,0 +1,10 @@
+{
+  "surfaces": [
+    { "name": "registry_cache", "type": "http_cache" },
+    {
+      "name": "registry_cache_no_downloads",
+      "type": "http_cache",
+      "params": { "content_reads": false }
+    }
+  ]
+}
