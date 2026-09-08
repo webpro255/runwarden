@@ -170,3 +170,10 @@ def _type_name(expected: type | tuple[type, ...]) -> str:
     if isinstance(expected, tuple):
         return " or ".join(_TYPE_NAMES.get(t, t.__name__) for t in expected)
     return _TYPE_NAMES.get(expected, expected.__name__)
+
+
+# Imported for their side effect: each module registers its adapter class into
+# config.SURFACE_TYPES. Placed at the bottom because they import names defined
+# above. cli.py imports this package, so registration happens before any config
+# is parsed.
+from . import filesystem  # noqa: E402,F401

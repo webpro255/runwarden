@@ -27,9 +27,9 @@ def test_probe_with_a_missing_config_exits_two(capsys, tmp_path):
 
 def test_probe_with_an_unknown_surface_type_exits_two(capsys, tmp_path):
     path = tmp_path / "surfaces.json"
-    path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "filesystem"}]}))
+    path.write_text(json.dumps({"surfaces": [{"name": "a", "type": "s3_bucket"}]}))
     assert main(["probe", "--config", str(path)]) == EXIT_CANNOT_RUN
-    assert "unknown surface type: filesystem" in capsys.readouterr().err
+    assert "unknown surface type: s3_bucket" in capsys.readouterr().err
 
 
 def test_probe_runs_a_registered_surface_and_writes_a_report(capsys, tmp_path, registered_type):

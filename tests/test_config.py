@@ -120,8 +120,11 @@ def test_unknown_surface_type_errors_with_the_type_name():
     assert "s3_bucket" in message
 
 
-def test_surface_type_registry_is_empty_in_this_phase():
-    assert SURFACE_TYPES == {}
+def test_the_registry_holds_exactly_the_adapters_built_so_far():
+    """A type that appears here without a test file is a type nobody probed."""
+    import runprobe.surfaces  # noqa: F401  (import registers the adapters)
+
+    assert set(SURFACE_TYPES) == {"filesystem"}
 
 
 def test_missing_surface_name_errors():
