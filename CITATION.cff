@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: >-
+  If you use runwarden in research, please cite it using the metadata in this
+  file.
+title: runwarden
+abstract: >-
+  A tool for detecting undeclared cross-run communication channels in autonomous
+  AI agent environments. runwarden plants a nonce from one agent run and
+  attempts to recover it from a second, supposedly isolated run, across the
+  shared surfaces an operator declares: a filesystem, a git remote, and a
+  read-through package cache. Findings are deterministic and structural, one row
+  per surface and carrier, with no model in the loop.
+type: software
+version: 0.1.0
+# TODO (David): set this to the actual release date before tagging v0.1.0.
+date-released: 2026-01-01
+license: Apache-2.0
+repository-code: https://github.com/webpro255/runwarden
+url: https://github.com/webpro255/runwarden
+authors:
+  - family-names: Race
+    given-names: David
+    alias: webpro255
+keywords:
+  - ai-agents
+  - ai-agent-security
+  - ai-security
+  - llm-security
+  - agent-isolation
+  - sandbox-escape
+  - cross-run
+  - noninterference
+  - information-flow
+  - covert-channel
+  - multi-agent
+  - security-testing
