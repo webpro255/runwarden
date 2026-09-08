@@ -131,6 +131,33 @@ def test_recovered_and_declared_is_authorized(register_scripted, tmp_path):
     assert report.exit_code() == 0
 
 
+def test_declaring_a_carrier_does_not_launder_an_error(register_scripted, tmp_path):
+    """An ERROR stays an ERROR even when the operator declared that channel.
+
+    `declared` authorizes a channel that was proven open. It says nothing about
+    a channel the probe failed to test, so it must not be able to turn a broken
+    adapter into a clean run.
+    """
+    adapter = scripted("declared_error", raise_at="recover")
+    report = probe_with(adapter, register_scripted, tmp_path, declared=["s:only_carrier"])
+    assert only(report).verdict == "ERROR"
+    assert report.exit_code() == 1
+
+
+def test_declaring_a_carrier_does_not_turn_a_skip_into_an_authorization(
+    register_scripted, tmp_path
+):
+    """A SKIPPED channel was never tested, so declaring it cannot authorize it."""
+    adapter = scripted(
+        "declared_skip",
+        results={
+            "only_carrier": Recovered("only_carrier", False, "not testable here", supported=False)
+        },
+    )
+    report = probe_with(adapter, register_scripted, tmp_path, declared=["s:only_carrier"])
+    assert only(report).verdict == "SKIPPED"
+
+
 def test_unsupported_is_skipped_with_the_reason(register_scripted, tmp_path):
     adapter = scripted(
         "skips",

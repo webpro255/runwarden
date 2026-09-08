@@ -32,6 +32,20 @@ def test_probe_with_an_unknown_surface_type_exits_two(capsys, tmp_path):
     assert "unknown surface type: s3_bucket" in capsys.readouterr().err
 
 
+def test_probe_with_an_undeclarable_carrier_exits_two(capsys, tmp_path, registered_type):
+    """A declared entry naming a carrier that does not exist is a config error.
+
+    Exit 2, not exit 0. A misspelled allowlist entry authorizes nothing while
+    reading as though it authorized something, so it fails at load.
+    """
+    path = tmp_path / "surfaces.json"
+    path.write_text(
+        json.dumps({"surfaces": [{"name": "a", "type": "fake"}], "declared": ["a:no_such"]})
+    )
+    assert main(["probe", "--config", str(path)]) == EXIT_CANNOT_RUN
+    assert "declared[0]" in capsys.readouterr().err
+
+
 def test_probe_runs_a_registered_surface_and_writes_a_report(capsys, tmp_path, registered_type):
     """FakeSurface recovers nothing, so the probe runs clean and exits zero."""
     path = tmp_path / "surfaces.json"
