@@ -11,15 +11,16 @@ abstract: >-
   read-through package cache. Findings are deterministic and structural, one row
   per surface and carrier, with no model in the loop.
 type: software
-version: 0.1.0
-# TODO (David): set this to the actual release date before tagging v0.1.0.
+version: 0.1.1
 date-released: 2026-09-09
 license: Apache-2.0
+doi: 10.5281/zenodo.22679860
 repository-code: https://github.com/webpro255/runwarden
 url: https://github.com/webpro255/runwarden
 authors:
-  - family-names: Race
+  - family-names: Grice
     given-names: David
+    orcid: https://orcid.org/0009-0005-5388-123X
     alias: webpro255
 keywords:
   - ai-agents

@@ -2,6 +2,7 @@
 
 **Detect undeclared cross-run communication channels in autonomous AI agent environments.**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22679860.svg)](https://doi.org/10.5281/zenodo.22679860)
 [![ci](https://github.com/webpro255/runwarden/actions/workflows/ci.yml/badge.svg)](https://github.com/webpro255/runwarden/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/runwarden.svg)](https://pypi.org/project/runwarden/)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/webpro255/runwarden/blob/main/pyproject.toml)
