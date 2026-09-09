@@ -6,8 +6,6 @@ Report a vulnerability in runwarden itself privately, not in a public issue.
 
 - Preferred: open a private advisory at
   https://github.com/webpro255/runwarden/security/advisories/new
-- Alternative: email TODO-SECURITY-CONTACT (David: replace this placeholder with
-  the address you want to receive reports on before the repo goes public).
 
 Please include the version, the platform, the config that reproduces it, and
 what you expected instead. A proof of concept helps and is not required.
